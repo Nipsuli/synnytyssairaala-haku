@@ -20,9 +20,11 @@ Run in watcher:
 deno run --allow-net --allow-env --allow-read --watch --unstable app/main.ts
 ```
 
-Everything formatted with `deno fmt`
+_Everything_ formatted with `deno fmt`
+
+Web server runs in Heroku, there is Cloudflare worker with caching in front,
+everyting is deployed with GH actions.
 
 TODO:
 
 - add styling
-- deployment
