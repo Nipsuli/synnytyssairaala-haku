@@ -60,9 +60,7 @@
   // Helpers
   function googleMapsDirectioniUrl(origin, destination) {
     return `https://www.google.com/maps/dir/?api=1&origin=${
-      encodeURI(
-        origin,
-      )
+      encodeURI(origin)
     }&destination=${encodeURI(destination)}`;
   }
 
