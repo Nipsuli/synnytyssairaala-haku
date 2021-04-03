@@ -1,0 +1,19 @@
+name: Pr Checks 
+
+on:
+  push:
+    pull_requests:
+      - main
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chekout
+        uses: actions/checkout@v2
+      - name: Set up Deno
+        uses: denolib/setup-deno@v2
+        with:
+          deno-version: 1.8.2
+      - name: Run linter
+        run: deno fmt --check
