@@ -113,10 +113,17 @@
   function createLocationDisplay(loc) {
     var e = createElement("div", "", { id: loc.name });
     var p = createElement("p");
-    p.appendChild(createElement("strong", loc.name));
+    var titleLink = createElement("a", "", {
+      href: loc.website,
+      target: "_blank",
+    });
+    titleLink.appendChild(createElement("strong", loc.name));
+    p.appendChild(titleLink);
     p.appendChild(createElement("br"));
     p.appendChild(
-      createElement("a", loc.phone, { href: loc.phone.replace(/\s/g, "") }),
+      createElement("a", loc.phone, {
+        href: `tel:${loc.phone.replace(/\s/g, "")}`,
+      }),
     );
     p.appendChild(createElement("br"));
     p.appendChild(
@@ -175,6 +182,5 @@
       });
   }
   // end Search functionality
-
   // end
 })(window, document, navigator);
