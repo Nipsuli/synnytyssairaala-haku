@@ -10,10 +10,12 @@ COPY ./app /app
 RUN deno compile --allow-net --allow-env --allow-read --unstable --output=app main.ts
 
 COPY ./static /app/static
-RUN minifier ./static/index.html
+# the minifier apperently just breaks most of things.
+# need to re think this
+# RUN minifier ./static/index.html
 # minifier doesn't strip comments --> f'ups the js file (p.-)
-RUN sed -i 's/\/\/.*$//g' static/js/index.js
-RUN minifier ./static/js/index.js
+# RUN sed -i 's/\/\/.*$//g' static/js/index.js
+# RUN minifier ./static/js/index.js
 # apperently need to use deno container even with the compliled app
 FROM hayd/alpine-deno:1.8.2 
 RUN  addgroup -S app && adduser -S app -G app
