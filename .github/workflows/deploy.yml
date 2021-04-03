@@ -17,9 +17,16 @@ jobs:
           deno-version: 1.8.2
       - name: Run linter
         run: deno fmt --check
-      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+      - name: Deploy web server
+        uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: "synnytyssairaala-haku" 
           heroku_email: "n.p.ahonen@gmail.com"
           usedocker: true
+      - name: Deploy proxy
+        uses: cloudflare/wrangler-action@1.3.0
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          environment: 'production'
+          workingDirectory: 'cache-proxy'
