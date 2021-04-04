@@ -7,7 +7,8 @@ Running in https://synnytyssairaalat.korvenlaita.fi/
 Tech:
 
 - Backend and web server with
-  [Deno](https://deno.land/manual/getting_started/installation)
+  [Deno](https://deno.land/manual/getting_started/installation) and
+  [Oak](https://github.com/oakserver/oak)
 - Frontend plain VanillaJS + [Bootsrap](https://getbootstrap.com) for styles.
 - Automatically deployed with GH actions
 - Backend running in Heroku
