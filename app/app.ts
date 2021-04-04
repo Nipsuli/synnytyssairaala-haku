@@ -67,7 +67,7 @@ app.use(router.allowedMethods());
 // Static files
 app.use(async (context) => {
   await send(context, context.request.url.pathname, {
-    root: `${Deno.cwd()}/static`,
+    root: `${Deno.cwd()}/public`,
     index: "index.html",
   });
 });
