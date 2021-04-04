@@ -53,9 +53,6 @@ app.use(async (ctx, next) => {
 // Router
 const router = new Router({ prefix: "/api" });
 router
-  .get("/foo", (ctx) => {
-    ctx.response.body = { data: "Hello from api/foo" };
-  })
   .get("/d", async (ctx) => {
     const params = oakHelpers.getQuery(ctx);
     if (!params.o) {
