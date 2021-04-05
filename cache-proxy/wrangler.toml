@@ -1,11 +1,9 @@
 name = "sairaala-haku-cache-proxy"
 type = "javascript"
-account_id = "b4ae0d68ed0afafcad0874dcfdef8193"
 workers_dev = true
 vars = { ENVIRONMENT = "dev" }
 
 [env.production]
 vars = { ENVIRONMENT = "production" }
 workers_dev = false
-zone_id = "71dd6b6c596270c12fa38bdc1bbe21cc"
 route = "synnytyssairaalat.korvenlaita.fi/*"
