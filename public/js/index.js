@@ -200,10 +200,14 @@
   }
   // END state managemetn
   // Utils
+  function cleanAddress(str) {
+    // don't ask, or do, but then I need few beers
+    return str.replace(/[\u2800]*/, "");
+  }
   function googleMapsDirectioniUrl(origin, destination) {
     return `https://www.google.com/maps/dir/?api=1&origin=${
-      encodeURI(origin)
-    }&destination=${encodeURI(destination)}`;
+      encodeURI(cleanAddress(origin))
+    }&destination=${encodeURI(cleanAddress(destination))}`;
   }
 
   function mapsImageUrl(origin, destinations, size) {
