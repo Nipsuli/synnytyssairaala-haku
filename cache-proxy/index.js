@@ -19,6 +19,8 @@ const router = event => {
     return apiCall
   } else if (url.pathname === '/e/loc') {
     return location
+  } else if (url.pathname === '/e/map') {
+    return mapImage
   }
 }
 
@@ -36,6 +38,15 @@ const notFound = () => {
     status: 404,
     statusText: 'not found',
   })
+}
+
+const mapImage = async event => {
+  const url = new URL(event.request.url)
+  url.searchParams.append('key', GOOGLE_API_KEY)
+  url.hostname = 'maps.googleapis.com'
+  url.pathname = '/maps/api/staticmap'
+  const r = new Request(url, event.request)
+  return await fetch(r)
 }
 
 const location = async event => {
@@ -65,6 +76,5 @@ const apiCall = async event => {
   url.hostname = 'synnytyssairaala-haku.herokuapp.com'
   const r = new Request(url, request)
   // Figure out how to use CF cache most bestest way
-  //return await fetch(r, { cf: { cacheEverything: true, cacheTtl: 3600 } });
   return await fetch(r)
 }

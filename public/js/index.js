@@ -4,6 +4,7 @@
   var header;
   var locationInput;
   var searchForm;
+  var searchMap;
   var searchResults;
   var searchSubmit;
   var searchSubmitIcon;
@@ -16,6 +17,7 @@
     header = d.getElementById("header");
     locationInput = d.getElementById("locationInput");
     searchForm = d.getElementById("searchForm");
+    searchMap = d.getElementById("searchMap");
     searchResults = d.getElementById("searchResults");
     searchSubmit = d.getElementById("searchSubmit");
     searchSubmitIcon = d.getElementById("searchSubmitIcon");
@@ -27,7 +29,7 @@
 
   function initSearchForm() {
     searchForm.addEventListener("submit", searchEvent);
-    searchSubmit.onclick = search;
+    searchSubmit.onclick = searchAndDisplay;
   }
 
   function initUseLocationButton() {
@@ -58,7 +60,7 @@
   function loadIpLocation() {
     return fetch("/e/loc").then((r) => {
       if (!r.ok) {
-        throw new Erro("Could not get ip location");
+        throw new Error("Could not get ip location");
       } else {
         return r.json();
       }
@@ -75,6 +77,7 @@
   }
   // end INIT
   // DOM manipulation
+  // generic
   function createElement(type, attrs, innerText) {
     var e = d.createElement(type);
     for (const [k, v] of Object.entries(attrs || {})) {
@@ -122,6 +125,7 @@
     [...arguments].forEach((e) => e.classList.remove("d-none"));
   }
 
+  // specific
   function createLocationDisplay(loc) {
     var mainDiv = createElement("div", { class: "card mb-2" });
     var cardBody = createElement("div", { class: "card-body" });
@@ -163,77 +167,56 @@
     return mainDiv;
   }
 
-  function displayLocationList(locs) {
+  function displayLocations(locs) {
+    const topLocations = locs.slice(0, 5);
+    const mapUrl = mapsImageUrl(
+      getLocation(),
+      topLocations.map((l) => l.google_address),
+    );
+    appendElements(
+      searchMap,
+      createElement("img", { src: mapUrl, class: "img-fluid" }),
+    );
+
     appendElements(
       searchResults,
-      ...locs.slice(0, 5).map(createLocationDisplay),
+      ...topLocations.map(createLocationDisplay),
     );
   }
-  // end DOM manipulation
-  // Search functionality
-  async function fetchResults(origin) {
-    const res = await fetch(`api/d?o=${encodeURI(origin)}`);
-    if (!res.ok) {
-      throw new Error(`Failed to fetch: ${res.status}`);
-    }
-    return res.json();
-  }
 
-  function readLocation() {
-    return searchForm.elements["location"].value;
-  }
-
-  function searchEvent(e) {
-    e.preventDefault();
-    search();
-  }
-
-  function searchFromLocation(location) {
-    locationInput.value = `${location.latitude},${location.longitude}`;
-    search();
-  }
-
-  function search() {
-    disable(searchSubmit, useLocationButton);
+  function clearSearchResults() {
     clearChildren(searchResults);
-    hide(searchSubmitIcon);
-    show(searchSubmitLoading);
-
-    fetchResults(readLocation())
-      .then(displayLocationList)
-      .catch(console.error)
-      .finally(() => {
-        hide(searchSubmitLoading);
-        show(searchSubmitIcon);
-        enable(searchSubmit, useLocationButton);
-      });
+    clearChildren(searchMap);
+  }
+  // end DOM manipulation
+  // State managment
+  // Location state lives in the form field
+  function getLocation() {
+    return locationInput.value;
   }
 
+  function updateLocation(location) {
+    locationInput.value = location;
+  }
+  // END state managemetn
+  // Utils
   function googleMapsDirectioniUrl(origin, destination) {
     return `https://www.google.com/maps/dir/?api=1&origin=${
       encodeURI(origin)
     }&destination=${encodeURI(destination)}`;
   }
 
-  function useLocation() {
-    disable(useLocationButton);
-    hide(useLocationIcon);
-    show(useLocationLoading);
-
-    getLocation()
-      .then(searchFromLocation)
-      .catch((e) => {
-        console.error(e);
-        alert("Sijainnin määrittäminen epäonnistui");
-      })
-      .finally(() => {
-        enable(useLocationButton);
-        show(useLocationIcon);
-        hide(useLocationLoading);
-      });
+  function mapsImageUrl(origin, destinations, size) {
+    const params = new URLSearchParams();
+    params.append("size", size || "800x400");
+    params.append("markers", `color:blue|${origin}`);
+    destinations.forEach((d, i) =>
+      params.append("markers", `label:${i + 1}|${d}`)
+    );
+    return `/e/map?${params.toString()}`;
   }
 
-  async function getLocation() {
+  async function getApproxLocation() {
     try {
       const locFromBrowser = await askLocation();
       return {
@@ -260,6 +243,58 @@
         reject("Could not get location");
       }
     });
+  }
+
+  function fillUserLocation() {
+    disable(useLocationButton);
+    hide(useLocationIcon);
+    show(useLocationLoading);
+
+    return getApproxLocation()
+      .then((l) => updateLocation(`${l.latitude},${l.longitude}`))
+      .catch((e) => {
+        console.error(e);
+        alert("Sijainnin määrittäminen epäonnistui");
+      })
+      .finally(() => {
+        enable(useLocationButton);
+        show(useLocationIcon);
+        hide(useLocationLoading);
+      });
+  }
+  // END Utils
+  // Search functionality
+  async function findNearest(origin) {
+    const res = await fetch(`api/d?o=${encodeURI(origin)}`);
+    if (!res.ok) {
+      throw new Error(`Failed to fetch: ${res.status}`);
+    }
+    return await res.json();
+  }
+
+  function searchEvent(e) {
+    e.preventDefault();
+    searchAndDisplay();
+  }
+
+  function useLocation() {
+    fillUserLocation().then(searchAndDisplay);
+  }
+
+  function searchAndDisplay() {
+    clearSearchResults();
+    disable(searchSubmit, useLocationButton);
+    hide(searchSubmitIcon);
+    show(searchSubmitLoading);
+
+    findNearest(getLocation())
+      .then(displayLocations)
+      .catch(console.error)
+      .finally(() => {
+        hide(searchSubmitLoading);
+        show(searchSubmitIcon);
+        enable(searchSubmit, useLocationButton);
+      });
   }
   // end Search functionality
 })(window, document, navigator);
