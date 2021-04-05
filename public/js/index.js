@@ -1,5 +1,6 @@
 (0, function (w, d, n) {
   // INIT
+  // elements
   var header;
   var locationInput;
   var searchForm;
@@ -33,24 +34,45 @@
     useLocationButton.onclick = useLocation;
   }
 
+  function initElements() {
+    loadElements();
+    initSearchForm();
+    initUseLocationButton();
+  }
+
+  d.addEventListener("DOMContentLoaded", initElements);
+  // other
+  var backendReadyPromise = checkBackend();
+  var ipLocationPromise = loadIpLocation();
+
   function checkBackend() {
-    fetch("/api/wake").then((r) => {
+    return fetch("/api/wake").then((r) => {
       if (!r.ok) {
         throw new Error(`Backend is not fine: ${r.statusText}`);
       } else {
         return r.json();
       }
-    }).then(console.log).catch(console.error);
+    }).catch(console.error);
   }
 
-  function init() {
-    loadElements();
-    initSearchForm();
-    initUseLocationButton();
-    checkBackend();
+  function loadIpLocation() {
+    return fetch("/e/loc").then((r) => {
+      if (!r.ok) {
+        throw new Erro("Could not get ip location");
+      } else {
+        return r.json();
+      }
+    }).then((j) => {
+      if (j.country_code === "FI") {
+        return {
+          longitude: j.longitude,
+          latitude: j.latitude,
+        };
+      } else {
+        throw new Error("IP addess not in Finland");
+      }
+    }).catch(console.error);
   }
-
-  d.addEventListener("DOMContentLoaded", init);
   // end INIT
   // DOM manipulation
   function createElement(type, attrs, innerText) {
@@ -157,7 +179,7 @@
     return res.json();
   }
 
-  function getLocation() {
+  function readLocation() {
     return searchForm.elements["location"].value;
   }
 
@@ -167,8 +189,7 @@
   }
 
   function searchFromLocation(location) {
-    locationInput.value =
-      `${location.coords.latitude},${location.coords.longitude}`;
+    locationInput.value = `${location.latitude},${location.longitude}`;
     search();
   }
 
@@ -178,7 +199,7 @@
     hide(searchSubmitIcon);
     show(searchSubmitLoading);
 
-    fetchResults(getLocation())
+    fetchResults(readLocation())
       .then(displayLocationList)
       .catch(console.error)
       .finally(() => {
@@ -199,7 +220,7 @@
     hide(useLocationIcon);
     show(useLocationLoading);
 
-    askLocation()
+    getLocation()
       .then(searchFromLocation)
       .catch((e) => {
         console.error(e);
@@ -212,6 +233,23 @@
       });
   }
 
+  async function getLocation() {
+    try {
+      const locFromBrowser = await askLocation();
+      return {
+        latitude: locFromBrowser.coods.latitude,
+        longitude: locFromBrowser.coords.longitude,
+      };
+    } catch (e) {
+      console.error(
+        "Failed to get location from browser, falling back to ip based location",
+        e,
+      );
+    }
+
+    return await ipLocationPromise;
+  }
+
   function askLocation() {
     // TODO: Figure out why this doesn't always work on mobile
     // for realz I hate todo comments :D
@@ -219,7 +257,7 @@
       if (n.geolocation) {
         n.geolocation.getCurrentPosition(resolve, reject);
       } else {
-        reject("Sijainti ei tuettu");
+        reject("Could not get location");
       }
     });
   }

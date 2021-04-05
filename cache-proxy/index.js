@@ -5,12 +5,21 @@ addEventListener('fetch', event => {
 })
 
 const handleRequest = async event => {
-  const url = new URL(event.request.url)
-  if (url.pathname.startsWith('/api')) {
-    return await apiCall(event)
+  const routefn = router(event)
+  if (routefn) {
+    return await routefn(event)
   }
   // static assets as fallback for all
   return await handleStaticAssets(event)
+}
+
+const router = event => {
+  const url = new URL(event.request.url)
+  if (url.pathname.startsWith('/api')) {
+    return apiCall
+  } else if (url.pathname === '/e/loc') {
+    return location
+  }
 }
 
 const handleStaticAssets = async event => {
@@ -18,11 +27,36 @@ const handleStaticAssets = async event => {
     return await getAssetFromKV(event)
   } catch (e) {
     let pathname = new URL(event.request.url).pathname
-    return new Response(`"${pathname}" not found`, {
-      status: 404,
-      statusText: 'not found',
-    })
+    return notFound()
   }
+}
+
+const notFound = () => {
+  return new Response('not found', {
+    status: 404,
+    statusText: 'not found',
+  })
+}
+
+const location = async event => {
+  const ip = event.request.headers.get('x-real-ip')
+  if (!ip) {
+    return notFound()
+  }
+
+  const res = await fetch(`https://ipwhois.app/json/${ip}`)
+
+  if (!res.ok) {
+    return notFound()
+  }
+
+  const data = await res.json()
+
+  return new Response(JSON.stringify(data), {
+    headers: {
+      'content-type': 'application/json;charset=UTF-8',
+    },
+  })
 }
 
 const apiCall = async event => {
