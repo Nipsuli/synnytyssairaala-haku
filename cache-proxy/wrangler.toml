@@ -7,3 +7,7 @@ vars = { ENVIRONMENT = "dev" }
 vars = { ENVIRONMENT = "production" }
 workers_dev = false
 route = "synnytyssairaalat.korvenlaita.fi/*"
+
+[site]
+bucket = "../public"
+entry-point = "."
