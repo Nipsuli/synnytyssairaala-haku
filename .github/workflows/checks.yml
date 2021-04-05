@@ -1,4 +1,4 @@
-name: Pr Checks 
+name: Checks 
 
 on:
   push:
@@ -56,6 +56,12 @@ jobs:
       - check-front-end
     if: github.ref == 'refs/heads/main'
     steps:
-      - run: echo FOO
+      - name: Trigger deployment
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_ACCESS_TOKEN }}
+          event-type: deploy
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+        
 
 
