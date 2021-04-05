@@ -237,7 +237,7 @@
     try {
       const locFromBrowser = await askLocation();
       return {
-        latitude: locFromBrowser.coods.latitude,
+        latitude: locFromBrowser.coords.latitude,
         longitude: locFromBrowser.coords.longitude,
       };
     } catch (e) {
