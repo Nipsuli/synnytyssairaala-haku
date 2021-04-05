@@ -33,10 +33,21 @@
     useLocationButton.onclick = useLocation;
   }
 
+  function checkBackend() {
+    fetch("/api/wake").then((r) => {
+      if (!r.ok) {
+        throw new Error(`Backend is not fine: ${r.statusText}`);
+      } else {
+        return r.json();
+      }
+    }).then(console.log).catch(console.error);
+  }
+
   function init() {
     loadElements();
     initSearchForm();
     initUseLocationButton();
+    checkBackend();
   }
 
   d.addEventListener("DOMContentLoaded", init);

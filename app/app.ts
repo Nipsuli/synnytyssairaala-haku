@@ -53,6 +53,10 @@ app.use(async (ctx, next) => {
 // Router
 const router = new Router({ prefix: "/api" });
 router
+  .get("/wake", (ctx) => {
+    // wake heroku dyno :P
+    ctx.response.body = { "I'm": "wake" };
+  })
   .get("/d", async (ctx) => {
     const params = oakHelpers.getQuery(ctx);
     if (!params.o) {
