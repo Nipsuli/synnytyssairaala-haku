@@ -6,7 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write '**/*.{js,css,json,md}'"
+    "format": "prettier --write '**/*.{js,css,json,md}'",
+    "lint": "prettier --check '**/*.{js,css,json,md}'"
   },
   "author": "niko <n.p.ahonen@gmail.com>",
   "license": "MIT",

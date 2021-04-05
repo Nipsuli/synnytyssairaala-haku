@@ -1,25 +1,17 @@
 name: Deploy
 
 on:
-  push:
-    branches:
-      - main
+  repository_dispatch:
+    types:
+      - deploy
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: Deploy
     steps:
-      - name: Chekout
-        uses: actions/checkout@v2
-      - name: Set up Deno
-        uses: denolib/setup-deno@v2
-        with:
-          deno-version: 1.8.2
-      - name: Run linter
-        run: deno fmt --check
       - name: Deploy web server
-        uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+        uses: akhileshns/heroku-deploy@v3.12.12
         with:
           heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
           heroku_app_name: "synnytyssairaala-haku" 

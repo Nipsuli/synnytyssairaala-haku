@@ -17,4 +17,5 @@ Tech:
 Run locally with `./watch`, requires google api with maps api enabled as
 `GOOGLE_API_KEY` env variable.
 
-_Everything_ formatted with `deno fmt`
+`./cache-proxy` dir formated with [`prettier`](https://prettier.io) _everything_
+else formatted with `deno fmt`
