@@ -28,7 +28,6 @@ const handleStaticAssets = async event => {
   try {
     return await getAssetFromKV(event)
   } catch (e) {
-    let pathname = new URL(event.request.url).pathname
     return notFound()
   }
 }
